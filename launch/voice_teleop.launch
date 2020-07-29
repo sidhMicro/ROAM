@@ -4,10 +4,13 @@
   <param name="/stretch_driver/broadcast_odom_tf" type="bool" value="true"/>
   <include file="$(find stretch_core)/launch/stretch_driver.launch" pass_all_args="true"/>
   <!-- -->
-    
+
+  <!-- Azure SPEECHSDK & LUIS -->
+  <!-- <node name="luis_test" pkg="ros_msft_luis" type="ros_msft_luis_node" output="screen" /> -->
+  <!-- -->
+
   <!-- VOICE TELEOP -->
   <node name="voice_teleop" pkg="ROAM" type="voice_teleop" output="screen" args=''/>
   <!-- -->
-  <!-- include file="$(find ros_msft_luis)/launch/luis_hello.launch"/ -->
-    
+
 </launch>
