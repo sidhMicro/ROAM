@@ -224,37 +224,37 @@ class GetKeyboardCommands:
         
         # 8 or up arrow
         if c == '8' or c == '\x1b[A':
-            command = {'joint': 'joint_lift', 'delta': self.get_deltas()['translate']}
+            command = {'joint': 'joint_lift', 'delta': self.get_deltas()['translate'], 'contact_threshold': 50}
         # 2 or down arrow
         if c == '2' or c == '\x1b[B':
-            command = {'joint': 'joint_lift', 'delta': -self.get_deltas()['translate']}
+            command = {'joint': 'joint_lift', 'delta': -self.get_deltas()['translate'], 'contact_threshold': 10}
         if self.mode == 'manipulation':
             # 4 or left arrow
             if c == '4' or c == '\x1b[D':
-                command = {'joint': 'joint_mobile_base_translation', 'delta': self.get_deltas()['translate']}
+                command = {'joint': 'joint_mobile_base_translation', 'delta': self.get_deltas()['translate'], 'contact_threshold': 30}
             # 6 or right arrow
             if c == '6' or c == '\x1b[C':
-                command = {'joint': 'joint_mobile_base_translation', 'delta': -self.get_deltas()['translate']}
+                command = {'joint': 'joint_mobile_base_translation', 'delta': -self.get_deltas()['translate'], 'contact_threshold': 30}
         elif self.mode == 'position':
             # 4 or left arrow
             if c == '4' or c == '\x1b[D':
-                command = {'joint': 'translate_mobile_base', 'inc': self.get_deltas()['translate']}
+                command = {'joint': 'translate_mobile_base', 'inc': self.get_deltas()['translate'], 'contact_threshold': 50}
             # 6 or right arrow
             if c == '6' or c == '\x1b[C':
-                command = {'joint': 'translate_mobile_base', 'inc': -self.get_deltas()['translate']}
+                command = {'joint': 'translate_mobile_base', 'inc': -self.get_deltas()['translate'], 'contact_threshold': 50}
             # 1 or end key 
             if c == '7' or c == '\x1b[H':
-                command = {'joint': 'rotate_mobile_base', 'inc': self.get_deltas()['rad']}
+                command = {'joint': 'rotate_mobile_base', 'inc': self.get_deltas()['rad'], 'contact_threshold': 50}
             # 3 or pg down 5~
             if c == '9' or c == '\x1b[5':
-                command = {'joint': 'rotate_mobile_base', 'inc': -self.get_deltas()['rad']}
+                command = {'joint': 'rotate_mobile_base', 'inc': -self.get_deltas()['rad'], 'contact_threshold': 50}
         elif self.mode == 'navigation':
             rospy.loginfo('ERROR: Navigation mode is not currently supported.')
 
         if c == 'w' or c == 'W':
-            command = {'joint': 'wrist_extension', 'delta': self.get_deltas()['translate']}
+            command = {'joint': 'wrist_extension', 'delta': self.get_deltas()['translate'], 'contact_threshold': 30}
         if c == 'x' or c == 'X':
-            command = {'joint': 'wrist_extension', 'delta': -self.get_deltas()['translate']}
+            command = {'joint': 'wrist_extension', 'delta': -self.get_deltas()['translate'], 'contact_threshold': 30}
         if c == 'd' or c == 'D':
             command = {'joint': 'joint_wrist_yaw', 'delta': -self.get_deltas()['rad']}
         if c == 'a' or c == 'A':
@@ -342,6 +342,8 @@ class KeyboardTeleopNode(hm.HelloNode):
                 rospy.loginfo('delta = {0}, joint_index = {1}, joint_value = {2}'.format(delta, joint_index, joint_value))
                 new_value = joint_value + delta
             point.positions = [new_value]
+            if command['contact_threshold']:
+                point.effort = [command['contact_threshold']]
             trajectory_goal.trajectory.points = [point]
             trajectory_goal.trajectory.header.stamp = rospy.Time.now()
             rospy.loginfo('joint_name = {0}, trajectory_goal = {1}'.format(joint_name, trajectory_goal))
