@@ -41,6 +41,8 @@ class GetKeyboardCommands:
         self.big_translate = 0.06
         self.mode = 'position' #'manipulation' #'navigation'
 
+
+
     def get_deltas(self):
         if self.step_size == 'small':
             deltas = {'rad': self.small_rad, 'translate': self.small_translate}
@@ -87,8 +89,28 @@ class GetKeyboardCommands:
     def get_command(self, node):
         command = None
         c = None
-        if(node.topIntent == 'move forward'):
+        if (node.topIntent == 'Arm Out'):
             c = 'w'
+        if(node.topIntent == 'Move Forward'):
+            c = '4'
+        if (node.topIntent == 'Move Backward'):
+            c = '6'
+        if (node.topIntent == 'Turn Left'):
+            c = '7'
+        if (node.topIntent == 'Turn Right'):
+            c = '9'
+        if (node.topIntent == 'Arm In'):
+            c = 'x'
+        if (node.topIntent == 'Arm Out'):
+            c = 'w'
+        if (node.topIntent == 'Lift Up'):
+            c = '8'
+        if (node.topIntent == 'Lift Down'):
+            c = '2'
+        if (node.topIntent == 'Wrist Out'):
+            c = 'a'
+        if (node.topIntent == 'Wrist In'):
+            c = 'd'
 
      #   c = kb.getch()
         #rospy.loginfo('c =', c)
@@ -277,19 +299,23 @@ class KeyboardTeleopNode(hm.HelloNode):
         self.rate = 10.0
         self.joint_state = None
         self.topIntent = None
+        self.score = None
         self.mapping_on = mapping_on
         self.hello_world_on = hello_world_on
         self.open_drawer_on = open_drawer_on
         self.clean_surface_on = clean_surface_on
         self.grasp_object_on = grasp_object_on
         self.deliver_object_on = deliver_object_on
+        self.motion = 'noMotion'
 
     def joint_states_callback(self, joint_state):
         self.joint_state = joint_state
 
     def intent_callback(self, intent):
         self.topIntent = intent.topIntent
+        self.score = intent.score
         rospy.loginfo('intent is %s', self.topIntent)
+        rospy.loginfo('score is %s', self.score)
 
     def send_command(self, command):
         joint_state = self.joint_state
@@ -317,6 +343,7 @@ class KeyboardTeleopNode(hm.HelloNode):
             rospy.loginfo('joint_name = {0}, trajectory_goal = {1}'.format(joint_name, trajectory_goal))
             self.trajectory_client.send_goal(trajectory_goal)
             rospy.loginfo('Done sending pose.')
+        self.topIntent = None
 
     def main(self):
         hm.HelloNode.main(self, 'keyboard_teleop', 'keyboard_teleop', wait_for_first_pointcloud=False)
@@ -389,7 +416,8 @@ class KeyboardTeleopNode(hm.HelloNode):
 
         while not rospy.is_shutdown():
             command = self.keys.get_command(self)
-            rospy.loginfo(command)
+            if command != None:
+                rospy.loginfo(command)
             self.send_command(command)
             rate.sleep()
 
