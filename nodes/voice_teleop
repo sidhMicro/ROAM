@@ -298,7 +298,7 @@ class KeyboardTeleopNode(hm.HelloNode):
         self.keys = GetKeyboardCommands(mapping_on, hello_world_on, open_drawer_on, clean_surface_on, grasp_object_on, deliver_object_on)
         self.rate = 10.0
         self.joint_state = None
-        self.topIntent = None
+        self.topIntent = 'Stop'
         self.score = None
         self.mapping_on = mapping_on
         self.hello_world_on = hello_world_on
@@ -312,8 +312,12 @@ class KeyboardTeleopNode(hm.HelloNode):
         self.joint_state = joint_state
 
     def intent_callback(self, intent):
-        self.topIntent = intent.topIntent
-        self.score = intent.score
+        if (intent.topIntent == 'Stop')  and (intent.score > 0.3):
+            self.topIntent = intent.topIntent
+            self.score = intent.score
+        if(intent.topIntent!= 'Stop') and (self.topIntent == 'Stop') and (intent.score > 0.95):
+            self.topIntent = intent.topIntent
+            self.score = intent.score
         rospy.loginfo('intent is %s', self.topIntent)
         rospy.loginfo('score is %s', self.score)
 
@@ -343,7 +347,7 @@ class KeyboardTeleopNode(hm.HelloNode):
             rospy.loginfo('joint_name = {0}, trajectory_goal = {1}'.format(joint_name, trajectory_goal))
             self.trajectory_client.send_goal(trajectory_goal)
             rospy.loginfo('Done sending pose.')
-        self.topIntent = None
+     #   self.topIntent = None
 
     def main(self):
         hm.HelloNode.main(self, 'keyboard_teleop', 'keyboard_teleop', wait_for_first_pointcloud=False)
@@ -416,6 +420,7 @@ class KeyboardTeleopNode(hm.HelloNode):
 
         while not rospy.is_shutdown():
             command = self.keys.get_command(self)
+            print(command)
             if command != None:
                 rospy.loginfo(command)
             self.send_command(command)
